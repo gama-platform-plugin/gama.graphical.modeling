@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="gama.feature.ui.diagram"
+      id="gama.ui.feature.diagram"
       label="Diagram Editor for GAMA"
       version="2025.6.0.qualifier"
       provider-name="INRAE-MIAT + IRD-UMMISCO"
