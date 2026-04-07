@@ -1,21 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="gama.ui.feature.diagram"
-      label="GAMA Graphical Modelling"
-      version="1.0.0.qualifier"
-      provider-name="GAMA Platform">
+      id="gama.feature.ui.diagram"
+      label="Diagram Editor for GAMA"
+      version="2025.6.0.qualifier"
+      provider-name="INRAE-MIAT + IRD-UMMISCO"
+      plugin="gama.ui.diagram">
 
    <description url="https://gama-platform.org">
-      [Enter feature description here.]
+      The graphical editor for GAMA, allowing to build and analyse models using diagrams
    </description>
 
-   <copyright url="https://gama-platform.org">
-      [Enter copyright here.]
-   </copyright>
+   <plugin
+         id="org.eclipse.graphiti"
+         version="0.0.0"/>
 
-   <license url="https://gama-platform.org/license">
-      [Enter license here.]
-   </license>
+   <plugin
+         id="org.eclipse.graphiti.mm"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.graphiti.pattern"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.graphiti.ui"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.draw2d"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.gef"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.emf.validation"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.emf.transaction"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.emf.workspace"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.emf.ecore.change"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.emf"
+         version="0.0.0"/>
 
    <plugin
          id="gama.ui.diagram"

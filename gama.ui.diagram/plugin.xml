@@ -1,6 +1,99 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension point="gaml.extension">
+   <extension
+         point="org.eclipse.graphiti.ui.diagramTypes">
+      <diagramType
+            id="gama.ui.diagram.GamaDiagramType"
+            name="Gama Diagram Type"
+            type="gamaDiagram">
+      </diagramType>
    </extension>
+   <extension
+         point="org.eclipse.graphiti.ui.diagramTypeProviders">
+      <diagramTypeProvider
+            class="gama.ui.diagram.editor.GamaDiagramTypeProvider"
+            id="gama.ui.diagram.editor.GamaDiagramTypeProvider"
+            name="Gama Diagram">
+         <diagramType
+               id="gama.ui.diagram.GamaDiagramType">
+         </diagramType>
+         <imageProvider
+               id="gama.ui.diagram.GamaImageProvider">
+         </imageProvider>
+      </diagramTypeProvider>
+   </extension>
+   <extension 
+         point="org.eclipse.graphiti.ui.imageProviders">
+      <imageProvider
+            class="gama.ui.diagram.swt.image.GamaImageProvider"
+            id="gama.ui.diagram.GamaImageProvider">
+      </imageProvider>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <wizard
+            category="gama.wizards"
+            class="gama.ui.diagram.swt.wizards.NewFileWizard"
+            icon="icons/wizards/diagram.png"
+            id="gama.ui.diagram.NewWizard"
+            name="Model diagram">
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu">
+         <menu
+               id="graphicalModelingMenu"
+               label="Graphical Modeling">
+            <command
+                  commandId="gama.ui.diagram.commands.GenerateDiagram"
+                  label="Generate diagram"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <reference
+                        definitionId="isGamlEditorOpened">
+                  </reference>
+               </visibleWhen>
+            </command>
+         </menu>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="gama.ui.diagram.swt.commands.GenerateDiagramHandler"
+            id="gama.ui.diagram.commands.GenerateDiagram"
+            name="Generate Diagram">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="gama.ui.diagram.editor.GamaDiagramEditor"
+            default="true"
+            extensions="gadl"
+            icon="icons/wizards/diagram_small.png"
+            id="gama.ui.diagram.editor"
+            matchingStrategy="org.eclipse.graphiti.ui.editor.DiagramEditorMatchingStrategy"
+            name="Gama Diagram Editor">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.emf.ecore.generated_package">
+      <package
+            class="gama.ui.diagram.metamodel.GamaPackage"
+            genModel="model/gama.genmodel"
+            uri="http://gama/1.0">
+      </package>
+   </extension>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="gama.ui.diagram.DiagramStartup">
+      </startup>
+   </extension>
+
 </plugin>
