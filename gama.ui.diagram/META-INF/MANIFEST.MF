@@ -4,29 +4,17 @@ Automatic-Module-Name: gama.ui.diagram
 Bundle-Name: GAMA Graphical Modelling
 Bundle-SymbolicName: gama.ui.diagram;singleton:=true
 Bundle-Vendor: INRAE-MIAT & IRD-UMMISCO
-Bundle-Version: 2025.6.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-21
-Require-Bundle: org.eclipse.ui.ide,
- org.eclipse.xtext.ui,
- org.eclipse.ui.views.properties.tabbed,
- org.eclipse.core.runtime,
- org.eclipse.ui,
- org.eclipse.jface.text,
- org.eclipse.ui.editors,
- org.apache.log4j,
- org.eclipse.emf,
- org.eclipse.gef,
- gaml.compiler,
- gama.core,
- gama.dependencies,
- gama.ui.editor,
- gama.ui.navigator,
- gama.ui.shared,
- gama.extension.bdi,
- gama.extension.maths,
+Bundle-Version: 2026.6.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-25
+Require-Bundle: org.eclipse.ui.ide,org.eclipse.xtext.ui,
+ org.eclipse.ui.views.properties.tabbed,org.eclipse.core.runtime,
+ org.eclipse.ui,org.eclipse.jface.text,org.eclipse.ui.editors,
+ org.apache.log4j,org.eclipse.emf,org.eclipse.gef,gaml.compiler,
+ gama.core,gama.dependencies,gama.ui.editor,gama.ui.navigator,
+ gama.ui.shared,gama.extension.bdi,gama.extension.maths,
  org.eclipse.graphiti;bundle-version="0.19.3",
  org.eclipse.graphiti.ui;bundle-version="0.19.3",
- org.eclipse.emf.transaction
+ org.eclipse.emf.transaction,gama.annotations,gama.processor,gama.api
 Export-Package: gama.ui.diagram.editor,
  gama.ui.diagram.features,
  gama.ui.diagram.features.add,
