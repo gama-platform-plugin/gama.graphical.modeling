@@ -27,7 +27,7 @@ import org.eclipse.xtext.ui.resource.IResourceSetProvider;
 import com.google.inject.Inject;
 
 import gama.ui.diagram.features.modelgeneration.ModelGenerator;
-import gaml.compiler.gaml.resource.GamlResource;
+import gaml.compiler.resource.GamlResource;
 
 /**
  * The Class GAMARessourceProvider.

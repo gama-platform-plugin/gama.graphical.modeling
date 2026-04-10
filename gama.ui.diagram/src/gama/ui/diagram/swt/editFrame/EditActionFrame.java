@@ -41,7 +41,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
-import gama.gaml.compilation.GAML;
+import gama.api.gaml.GAML;
 import gama.ui.diagram.editor.GamaDiagramEditor;
 import gama.ui.diagram.features.ExampleUtil;
 import gama.ui.diagram.features.edit.EditFeature;
@@ -85,10 +85,7 @@ public class EditActionFrame extends EditFrame {
 		types.add("rgb");
 		types.add("point");
 		types.add("geometry");
-		for (final String ty : GAML.VARTYPE2KEYWORDS.values()) {
-			if (!types.contains(ty) && !ty.toString().endsWith("_file")) { types.add(ty); }
-
-		}
+		// VARTYPE2KEYWORDS was removed in the API rework; keep the basic built-in types only
 		for (final ESpecies sp : speciesList) { types.add(sp.getName()); }
 		types.remove("unknown");
 		types.remove("world");

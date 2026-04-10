@@ -28,16 +28,15 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.graphiti.features.IFeatureProvider;
 import org.eclipse.graphiti.mm.pictograms.Diagram;
 import org.eclipse.graphiti.mm.pictograms.Shape;
+import gama.api.kernel.species.IModelSpecies;
 import org.eclipse.xtext.resource.SynchronizedXtextResourceSet;
 import org.eclipse.xtext.resource.XtextResourceSet;
 
 import com.google.common.collect.Iterables;
 
-import gama.core.kernel.model.IModel;
-import gama.gaml.compilation.GamlCompilationError;
-import gama.gaml.compilation.GamlCompilationError.GamlCompilationErrorType;
-import gama.gaml.descriptions.ModelDescription;
-import gama.gaml.interfaces.IGamlIssue;
+import gama.api.compilation.GamlCompilationError;
+import gama.api.compilation.descriptions.IModelDescription;
+import gama.api.constants.IGamlIssue;
 import gama.ui.diagram.editor.GamaDiagramEditor;
 import gama.ui.diagram.editor.ModelStructure;
 import gama.ui.diagram.features.ExampleUtil;
@@ -77,7 +76,7 @@ import gama.ui.diagram.metamodel.ETask;
 import gama.ui.diagram.metamodel.ETaskLink;
 import gama.ui.diagram.metamodel.EVariable;
 import gama.ui.diagram.metamodel.EWorldAgent;
-import gaml.compiler.gaml.resource.GamlResource;
+import gaml.compiler.resource.GamlResource;
 
 /**
  * The Class ModelGenerator.
@@ -96,19 +95,22 @@ public class ModelGenerator {
 	 *            the errors
 	 * @return the model description
 	 */
-	private static ModelDescription buildModelDescription(final GamlResource r,
+	private static IModelDescription buildModelDescription(final GamlResource r,
 			final List<GamlCompilationError> errors) {
 		try {
 
 			// Syntactic errors detected, we cannot build the resource
 			if (r.hasErrors()) {
 				if (errors != null) {
-					errors.add(new GamlCompilationError("Syntax errors ", IGamlIssue.GENERAL, r.getContents().get(0), GamlCompilationErrorType.Error));
+					// Create a compilation error using the new GamlCompilationError API
+					// Use the factory to associate the error with the EObject source and mark it as Error
+					errors.add(GamlCompilationError.create("Syntax errors detected ", IGamlIssue.GENERAL,
+							r.getContents().get(0), GamlCompilationError.Type.Error));
 				}
-				return null; 
+				return null;
 			}
 			// We build the description
-			final ModelDescription model = r.buildCompleteDescription();
+			final IModelDescription model = r.buildCompleteDescription();
 			if (errors != null) { Iterables.addAll(errors, r.getValidationContext()); }
 			return model;
 		} finally {}
@@ -123,7 +125,7 @@ public class ModelGenerator {
 	 *            the diagram
 	 * @return the i model
 	 */
-	public static IModel modelGeneration(final IFeatureProvider fp, final Diagram diagram) {
+	public static IModelSpecies modelGeneration(final IFeatureProvider fp, final Diagram diagram) {
 		final GamaDiagramEditor diagramEditor = (GamaDiagramEditor) ExampleUtil.getDiagramEditor(fp);
 		diagramEditor.initIdsEObjects();
 		final XtextResourceSet rs = new SynchronizedXtextResourceSet();
@@ -142,8 +144,8 @@ public class ModelGenerator {
 		try {
 			final Set<GamlResource> resources = new HashSet<>();
 			resources.add(resource);
-			final ModelDescription modeldesc = buildModelDescription(resource, new ArrayList<>());
-			return modeldesc == null ? null : (IModel) modeldesc.compile();
+			final IModelDescription modeldesc = buildModelDescription(resource, new ArrayList<>());
+			return modeldesc == null ? null : (IModelSpecies) modeldesc.compile();
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}

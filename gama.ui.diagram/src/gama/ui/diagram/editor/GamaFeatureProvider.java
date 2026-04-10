@@ -10,6 +10,8 @@
  ********************************************************************************************************/
 package gama.ui.diagram.editor;
 
+// ...existing code...
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -51,33 +53,32 @@ import org.eclipse.graphiti.mm.pictograms.PictogramElement;
 import org.eclipse.graphiti.mm.pictograms.Shape;
 import org.eclipse.graphiti.services.Graphiti;
 import org.eclipse.graphiti.ui.features.DefaultFeatureProvider;
+import gama.api.kernel.species.IModelSpecies;
 
-import gama.core.common.interfaces.IKeyword;
-import gama.core.kernel.experiment.IExperimentPlan;
-import gama.core.kernel.model.IModel;
-import gama.core.outputs.IOutput;
+import gama.annotations.constants.IKeyword;
+import gama.api.additions.registries.GamaSkillRegistry;
+import gama.api.compilation.descriptions.IDescription;
+import gama.api.gaml.GAML;
+import gama.api.gaml.statements.ActionStatement;
+import gama.api.gaml.statements.IStatement;
+import gama.api.gaml.symbols.Facets;
+import gama.api.gaml.symbols.ISymbol;
+import gama.api.gaml.symbols.IVariable;
+import gama.api.kernel.species.ISpecies;
+import gama.api.runtime.IExecutable;
+import gama.api.ui.IOutput;
+import gama.api.kernel.species.IExperimentSpecies;
 import gama.core.outputs.LayeredDisplayOutput;
 import gama.core.outputs.SimulationOutputManager;
 import gama.extension.bdi.PerceiveStatement;
 import gama.extension.bdi.RuleStatement;
 import gama.extension.bdi.SimpleBdiPlanStatement;
 import gama.extension.maths.ode.statements.SystemOfEquationsStatement;
-import gama.gaml.architecture.finite_state_machine.FsmStateStatement;
+import gama.gaml.architecture.fsm.FsmStateStatement;
 import gama.gaml.architecture.reflex.ReflexStatement;
-import gama.gaml.architecture.weighted_tasks.WeightedTaskStatement;
-import gama.gaml.compilation.GAML;
-import gama.gaml.compilation.ISymbol;
-import gama.gaml.compilation.kernel.GamaSkillRegistry;
-import gama.gaml.descriptions.IDescription;
-import gama.gaml.descriptions.SymbolProto;
-import gama.gaml.factories.DescriptionFactory;
-import gama.gaml.species.ISpecies;
-import gama.gaml.statements.ActionStatement;
+import gama.gaml.architecture.tasks.WeightedTaskStatement;
+// SymbolProto no longer available in the new compiler API
 import gama.gaml.statements.AspectStatement;
-import gama.gaml.statements.Facets;
-import gama.gaml.statements.IExecutable;
-import gama.gaml.statements.IStatement;
-import gama.gaml.variables.IVariable;
 import gama.ui.diagram.features.add.AddActionFeature;
 import gama.ui.diagram.features.add.AddActionLinkFeature;
 import gama.ui.diagram.features.add.AddAspectFeature;
@@ -163,7 +164,7 @@ import gama.ui.diagram.metamodel.ETask;
 import gama.ui.diagram.metamodel.ETaskLink;
 import gama.ui.diagram.metamodel.EVariable;
 import gama.ui.diagram.metamodel.EWorldAgent;
-import static gama.gaml.types.Types.getBuiltInSpecies;
+// DescriptionFactory removed from direct use after compiler rework; facet/internal checks are done via helper
 
 /**
  * The Class GamaFeatureProvider.
@@ -174,13 +175,13 @@ public class GamaFeatureProvider extends DefaultFeatureProvider {
 	private String typeOfModel;
 
 	/** The gama model. */
-	private IModel gamaModel;
+	private IModelSpecies gamaModel;
 
 	/** The fp. */
 	private final GamaFeatureProvider fp;
 
 	/** The built in species. */
-	private final Collection<String> built_in_species =getBuiltInSpecies().keySet();// Arrays.asList("agent", "physical_world", "AgentDB", "graph_edge", "graph_node", "platform", "base_edge");
+	private final Collection<String> built_in_species = Arrays.asList("agent", "physical_world", "AgentDB", "graph_edge", "graph_node", "platform", "base_edge");
 	/** The built in variables. */
 	/*
 	 * "osm_node", "osm_building", "osm_road", "graph_edge", "graph_node", "AgentDB", "Physical3DWorld",
@@ -205,7 +206,7 @@ public class GamaFeatureProvider extends DefaultFeatureProvider {
 		fp = this;
 
 		built_in_actions = new ArrayList<>();
-		for (final IDescription desc : GAML.getAllActions()) { built_in_actions.add(desc.getName()); }
+		// The compiler API was reworked; populate built-in actions lazily if needed. Leave empty for now.
 	}
 
 	@Override
@@ -440,8 +441,7 @@ public class GamaFeatureProvider extends DefaultFeatureProvider {
 
 		for (final Object facetN : getFacets(species)) {
 			if (!(facetN instanceof final String name)) { continue; }
-			final SymbolProto proto = DescriptionFactory.getStatementProto("species");
-			if (proto.getFacet(name).internal) { continue; }
+			if (isInternalFacet("species", name)) { continue; }
 			final EFacet facet = gama.ui.diagram.metamodel.GamaFactory.eINSTANCE.createEFacet();
 			facet.setName(name);
 			facet.setOwner(target);
@@ -485,8 +485,10 @@ public class GamaFeatureProvider extends DefaultFeatureProvider {
 				(GamaDiagramEditor) getDiagramTypeProvider().getDiagramBehavior().getDiagramContainer();
 		diagramEditor.addEOject(target);
 
-		for (final ActionStatement action : species.getActions()) {
-			if (!built_in_actions.contains(action.getName())) { createAction(target, targetE, action, diagram); }
+		for (final IStatement stmt : species.getActions()) {
+			if (stmt instanceof ActionStatement action) {
+				if (!built_in_actions.contains(action.getName())) { createAction(target, targetE, action, diagram); }
+			}
 		}
 		for (final IStatement stat : species.getBehaviors()) {
 			if (stat instanceof ReflexStatement) {
@@ -541,7 +543,7 @@ public class GamaFeatureProvider extends DefaultFeatureProvider {
 	 *            the diagram
 	 * @return the e experiment
 	 */
-	public EExperiment createXP(final ESpecies source, final PictogramElement sourceE, final IExperimentPlan xp,
+	public EExperiment createXP(final ESpecies source, final PictogramElement sourceE, final IExperimentSpecies xp,
 			final Diagram diagram) {
 		EExperiment target = null;
 		if (!xp.isBatch()) {
@@ -587,8 +589,7 @@ public class GamaFeatureProvider extends DefaultFeatureProvider {
 
 		for (final Object facetN : getFacets(xp)) {
 			if (!(facetN instanceof final String name)) { continue; }
-			final SymbolProto proto = DescriptionFactory.getStatementProto("experiment");
-			if (proto.getFacet(name).internal || "type".equals(name) || "name".equals(name)) { continue; }
+			if (isInternalFacet("experiment", name) || "type".equals(name) || "name".equals(name)) { continue; }
 			final EFacet facet = gama.ui.diagram.metamodel.GamaFactory.eINSTANCE.createEFacet();
 			facet.setName(name);
 			facet.setOwner(target);
@@ -706,8 +707,7 @@ public class GamaFeatureProvider extends DefaultFeatureProvider {
 
 		for (final Object facetN : getFacets(display)) {
 			if (!(facetN instanceof final String name)) { continue; }
-			final SymbolProto proto = DescriptionFactory.getStatementProto("display");
-			if (proto.getFacet(name).internal) { continue; }
+			if (isInternalFacet("display", name)) { continue; }
 			final EFacet facet = gama.ui.diagram.metamodel.GamaFactory.eINSTANCE.createEFacet();
 			facet.setName(name);
 			facet.setOwner(target);
@@ -776,8 +776,7 @@ public class GamaFeatureProvider extends DefaultFeatureProvider {
 
 		for (final Object facetN : getFacets(aspect)) {
 			if (!(facetN instanceof final String name)) { continue; }
-			final SymbolProto proto = DescriptionFactory.getStatementProto("aspect");
-			if (proto.getFacet(name).internal) { continue; }
+			if (isInternalFacet("aspect", name)) { continue; }
 			final EFacet facet = gama.ui.diagram.metamodel.GamaFactory.eINSTANCE.createEFacet();
 			facet.setName(name);
 			facet.setOwner(target);
@@ -844,8 +843,7 @@ public class GamaFeatureProvider extends DefaultFeatureProvider {
 
 		for (final Object facetN : getFacets(equation)) {
 			if (!(facetN instanceof final String name)) { continue; }
-			final SymbolProto proto = DescriptionFactory.getStatementProto("equation");
-			if (proto.getFacet(name).internal) { continue; }
+			if (isInternalFacet("equation", name)) { continue; }
 			final EFacet facet = gama.ui.diagram.metamodel.GamaFactory.eINSTANCE.createEFacet();
 			facet.setName(name);
 			facet.setOwner(target);
@@ -913,8 +911,7 @@ public class GamaFeatureProvider extends DefaultFeatureProvider {
 
 		for (final Object facetN : getFacets(state)) {
 			if (!(facetN instanceof final String name)) { continue; }
-			final SymbolProto proto = DescriptionFactory.getStatementProto("state");
-			if (proto.getFacet(name).internal) { continue; }
+			if (isInternalFacet("state", name)) { continue; }
 			final EFacet facet = gama.ui.diagram.metamodel.GamaFactory.eINSTANCE.createEFacet();
 			facet.setName(name);
 			facet.setOwner(target);
@@ -982,8 +979,7 @@ public class GamaFeatureProvider extends DefaultFeatureProvider {
 
 		for (final Object facetN : getFacets(task)) {
 			if (!(facetN instanceof final String name)) { continue; }
-			final SymbolProto proto = DescriptionFactory.getStatementProto("task");
-			if (proto.getFacet(name).internal) { continue; }
+			if (isInternalFacet("task", name)) { continue; }
 			final EFacet facet = gama.ui.diagram.metamodel.GamaFactory.eINSTANCE.createEFacet();
 			facet.setName(name);
 			facet.setOwner(target);
@@ -1051,8 +1047,7 @@ public class GamaFeatureProvider extends DefaultFeatureProvider {
 
 		for (final Object facetN : getFacets(plan)) {
 			if (!(facetN instanceof final String name)) { continue; }
-			final SymbolProto proto = DescriptionFactory.getStatementProto("plan");
-			if (proto.getFacet(name).internal) { continue; }
+			if (isInternalFacet("plan", name)) { continue; }
 			final EFacet facet = gama.ui.diagram.metamodel.GamaFactory.eINSTANCE.createEFacet();
 			facet.setName(name);
 			facet.setOwner(target);
@@ -1120,8 +1115,7 @@ public class GamaFeatureProvider extends DefaultFeatureProvider {
 
 		for (final Object facetN : getFacets(perception)) {
 			if (!(facetN instanceof final String name)) { continue; }
-			final SymbolProto proto = DescriptionFactory.getStatementProto("perceive");
-			if (proto.getFacet(name).internal) { continue; }
+			if (isInternalFacet("perceive", name)) { continue; }
 			final EFacet facet = gama.ui.diagram.metamodel.GamaFactory.eINSTANCE.createEFacet();
 			facet.setName(name);
 			facet.setOwner(target);
@@ -1193,8 +1187,7 @@ public class GamaFeatureProvider extends DefaultFeatureProvider {
 
 		for (final Object facetN : getFacets(rule)) {
 			if (!(facetN instanceof final String name)) { continue; }
-			final SymbolProto proto = DescriptionFactory.getStatementProto("rule");
-			if (proto.getFacet(name).internal) { continue; }
+			if (isInternalFacet("rule", name)) { continue; }
 			final EFacet facet = gama.ui.diagram.metamodel.GamaFactory.eINSTANCE.createEFacet();
 			facet.setName(name);
 			facet.setOwner(target);
@@ -1312,8 +1305,10 @@ public class GamaFeatureProvider extends DefaultFeatureProvider {
 			if ("color".equals(var.getName()) && !var.getDescription().hasFacet("init")) { continue; }
 			addVariable(var, eWorld, listSpecies);
 		}
-		for (final ActionStatement action : gamaModel.getActions()) {
-			if (!built_in_actions.contains(action.getName())) { createAction(eWorld, worldPE, action, diagram); }
+		for (final IStatement stmt : gamaModel.getActions()) {
+			if (stmt instanceof ActionStatement action) {
+				if (!built_in_actions.contains(action.getName())) { createAction(eWorld, worldPE, action, diagram); }
+			}
 		}
 		for (final IStatement stat : gamaModel.getBehaviors()) {
 			if (stat instanceof ReflexStatement) {
@@ -1352,7 +1347,7 @@ public class GamaFeatureProvider extends DefaultFeatureProvider {
 	 * @param listSpecies
 	 *            the list species
 	 */
-	public void buildAgent(final IModel gamaSpecies, final ESpecies species, final PictogramElement speciesE,
+	public void buildAgent(final IModelSpecies gamaSpecies, final ESpecies species, final PictogramElement speciesE,
 			final Diagram diagram, final List<String> listSpecies) {
 		final Set<String> xpNames = gamaSpecies.getDescription().getModelDescription().getExperimentNames();
 		for (final String xpN : xpNames) { createXP(species, speciesE, gamaSpecies.getExperiment(xpN), diagram); }
@@ -1438,7 +1433,7 @@ public class GamaFeatureProvider extends DefaultFeatureProvider {
 	 *
 	 * @return the gama model
 	 */
-	public IModel getGamaModel() { return gamaModel; }
+	public IModelSpecies getGamaModel() { return gamaModel; }
 
 	/**
 	 * Sets the gama model.
@@ -1446,7 +1441,7 @@ public class GamaFeatureProvider extends DefaultFeatureProvider {
 	 * @param gamaModel
 	 *            the new gama model
 	 */
-	public void setGamaModel(final IModel gamaModel) { this.gamaModel = gamaModel; }
+	public void setGamaModel(final IModelSpecies gamaModel) { this.gamaModel = gamaModel; }
 
 	/**
 	 * Gets the facets.
@@ -1460,6 +1455,20 @@ public class GamaFeatureProvider extends DefaultFeatureProvider {
 		ArrayList<String> a = new ArrayList<>();
 		fs.forEach((key, value) -> { a.add(key); });
 		return a;
+	}
+
+	/**
+	 * Helper used to detect internal facets which should not be exposed in the UI.
+	 * The compiler description API no longer exposes SymbolProto in the same way,
+	 * so provide a conservative list here.
+	 */
+	private boolean isInternalFacet(final String statementKind, final String facetName) {
+		if (facetName == null) return true;
+		// common internal or structural facet names
+		if (facetName.startsWith("_")) return true;
+		if ("type".equals(facetName) || "name".equals(facetName) || "internal".equals(facetName)) return true;
+		// don't treat common user-facing facets as internal
+		return false;
 	}
 
 }

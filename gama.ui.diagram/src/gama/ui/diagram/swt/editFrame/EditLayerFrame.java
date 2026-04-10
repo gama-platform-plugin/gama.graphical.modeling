@@ -48,7 +48,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
-import gama.core.common.interfaces.IKeyword;
+import gama.annotations.constants.IKeyword;
 import gama.ui.diagram.editor.GamaDiagramEditor;
 import gama.ui.diagram.features.ExampleUtil;
 import gama.ui.diagram.features.edit.EditFeature;

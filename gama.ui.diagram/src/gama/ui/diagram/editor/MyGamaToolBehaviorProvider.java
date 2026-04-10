@@ -28,7 +28,7 @@ import org.eclipse.graphiti.palette.impl.ObjectCreationToolEntry;
 import org.eclipse.graphiti.palette.impl.PaletteCompartmentEntry;
 import org.eclipse.graphiti.tb.DefaultToolBehaviorProvider;
 
-import gama.core.util.GamaMapFactory;
+import gama.api.types.map.GamaMapFactory;
 import gama.ui.diagram.features.create.CreateActionLinkFeature;
 import gama.ui.diagram.features.create.CreateAspectLinkFeature;
 import gama.ui.diagram.features.create.CreateEquationLinkFeature;

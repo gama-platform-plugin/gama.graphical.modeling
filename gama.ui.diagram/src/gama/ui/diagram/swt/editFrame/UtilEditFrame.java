@@ -27,7 +27,7 @@ import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
-import gama.gaml.compilation.GamlCompilationError;
+import gama.api.compilation.GamlCompilationError;
 import gama.ui.diagram.features.edit.EditFeature;
 import gama.ui.diagram.features.modelgeneration.ModelGenerator;
 import gama.ui.diagram.metamodel.EGamaObject;

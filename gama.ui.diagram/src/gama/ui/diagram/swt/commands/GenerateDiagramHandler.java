@@ -36,15 +36,15 @@ import org.eclipse.graphiti.ui.internal.services.GraphitiUiInternal;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
+import gama.api.kernel.species.IModelSpecies;
 
-import gama.core.kernel.model.IModel;
 import gama.ui.diagram.FileService;
 import gama.ui.diagram.editor.GamaDiagramEditor;
 import gama.ui.diagram.editor.GamaFeatureProvider;
 import gama.ui.shared.utils.WorkbenchHelper;
-import gaml.compiler.gaml.validation.GamlModelBuilder;
 import gaml.compiler.ui.editor.GamlEditor;
 import gaml.compiler.ui.editor.IDiagramOpener;
+import gaml.compiler.validation.GamlModelBuilder;
 
 /**
  * The Class GenerateDiagramHandler.
@@ -70,7 +70,7 @@ public class GenerateDiagramHandler extends AbstractHandler implements IDiagramO
 	 * @param gamaModel
 	 *            the gama model
 	 */
-	private void createDiagramEditor(final IFile file, final String diagramName, final IModel gamaModel) {
+	private void createDiagramEditor(final IFile file, final String diagramName, final IModelSpecies gamaModel) {
 		// Create the diagram
 		final Diagram diagram = Graphiti.getPeCreateService().createDiagram("gamaDiagram", diagramName, true);
 
@@ -136,8 +136,8 @@ public class GenerateDiagramHandler extends AbstractHandler implements IDiagramO
 	 */
 	@Override
 	public void open(final GamlEditor editor) {
-		final IModel model = editor.getDocument()
-				.readOnly(state -> GamlModelBuilder.getDefaultInstance().compile(state.getURI(), null));
+		final IModelSpecies model = editor.getDocument()
+				.readOnly(state -> GamlModelBuilder.getInstance().compile(state.getURI(), null));
 		if (model == null) return;
 		final File file = new File(model.getProjectPath() + "/diagrams/" + model.getName() + ".gadl");
 		if (file.exists()) { file.delete(); }

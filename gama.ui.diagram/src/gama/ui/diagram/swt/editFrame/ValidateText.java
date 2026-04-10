@@ -22,7 +22,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ToolTip;
 
-import gama.core.util.GamaMapFactory;
+import gama.api.types.map.GamaMapFactory;
 import gama.ui.diagram.editor.GamaDiagramEditor;
 import gama.ui.diagram.features.modelgeneration.ModelGenerator;
 

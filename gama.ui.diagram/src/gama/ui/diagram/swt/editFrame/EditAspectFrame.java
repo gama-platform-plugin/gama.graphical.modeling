@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
-import gama.core.util.GamaMapFactory;
+import gama.api.types.map.GamaMapFactory;
 import gama.ui.diagram.editor.GamaDiagramEditor;
 import gama.ui.diagram.features.ExampleUtil;
 import gama.ui.diagram.features.edit.EditFeature;

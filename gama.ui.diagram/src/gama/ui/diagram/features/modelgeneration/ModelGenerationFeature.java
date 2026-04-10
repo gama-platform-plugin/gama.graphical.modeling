@@ -37,7 +37,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.xtext.util.StringInputStream;
 
-import gama.core.runtime.GAMA;
+import gama.api.GAMA;
 import gama.ui.shared.utils.WorkbenchHelper;
 import gaml.compiler.ui.editor.GamlEditor;
 
@@ -110,7 +110,7 @@ public class ModelGenerationFeature extends AbstractCustomFeature {
 		} catch (IOException | CoreException e) {
 			e.printStackTrace();
 		}
-		GAMA.getGui().editModel(fileP);
+		GAMA.getGui().getModelsManager().editModel(fileP);
 		doFinish(fileP);
 
 	}

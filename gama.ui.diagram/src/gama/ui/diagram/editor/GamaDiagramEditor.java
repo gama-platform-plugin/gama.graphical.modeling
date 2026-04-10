@@ -25,6 +25,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.transaction.RecordingCommand;
 import org.eclipse.emf.transaction.TransactionalEditingDomain;
 import org.eclipse.emf.transaction.util.TransactionUtil;
+import org.eclipse.graphiti.internal.util.T;
 import org.eclipse.graphiti.mm.pictograms.Diagram;
 import org.eclipse.graphiti.mm.pictograms.Shape;
 import org.eclipse.graphiti.ui.editor.DiagramBehavior;
@@ -43,16 +44,14 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import gama.api.kernel.species.IModelSpecies;
 import org.eclipse.xtext.resource.SynchronizedXtextResourceSet;
 import org.eclipse.xtext.resource.XtextResourceSet;
 
-import gama.core.kernel.model.IModel;
-import gama.core.runtime.GAMA;
-import gama.core.util.GamaMapFactory;
-import gama.gaml.compilation.GamlCompilationError;
-import gama.gaml.descriptions.IDescription;
-import gama.gaml.descriptions.ModelDescription;
-import gama.gaml.descriptions.ValidationContext;
+import gama.api.GAMA;
+import gama.api.compilation.GamlCompilationError;
+import gama.api.compilation.descriptions.IDescription;
+import gama.api.types.map.GamaMapFactory;
 import gama.ui.diagram.features.modelgeneration.ModelGenerator;
 import gama.ui.diagram.metamodel.EAction;
 import gama.ui.diagram.metamodel.EAspect;
@@ -68,6 +67,7 @@ import gama.ui.diagram.metamodel.EReflex;
 import gama.ui.diagram.metamodel.ESpecies;
 import gama.ui.diagram.metamodel.EVariable;
 import gama.ui.shared.resources.IGamaColors;
+import gama.api.compilation.descriptions.IModelDescription;
 import gaml.compiler.gaml.Model;
 import gaml.compiler.gaml.Statement;
 import gaml.compiler.gaml.impl.ArgumentDefinitionImpl;
@@ -81,10 +81,11 @@ import gaml.compiler.gaml.impl.S_ReflexImpl;
 import gaml.compiler.gaml.impl.S_SpeciesImpl;
 import gaml.compiler.gaml.impl.StatementImpl;
 import gaml.compiler.gaml.impl.VariableRefImpl;
-import gaml.compiler.gaml.impl.speciesOrGridDisplayStatementImpl;
-import gaml.compiler.gaml.resource.GamlResource;
-import gaml.compiler.gaml.resource.GamlResourceServices;
-import gaml.compiler.gaml.validation.IGamlBuilderListener;
+// speciesOrGridDisplayStatementImpl was removed/renamed in the compiler rework; use StatementImpl instead
+import gaml.compiler.resource.GamlResource;
+import gaml.compiler.resource.GamlResourceServices;
+import gaml.compiler.validation.IGamlBuilderListener;
+import gama.api.compilation.validation.IValidationContext;
 
 /**
  * The Class GamaDiagramEditor.
@@ -169,8 +170,8 @@ public class GamaDiagramEditor extends DiagramEditor implements IGamlBuilderList
 	 *            the status
 	 */
 	@Override
-	public void validationEnded(final ModelDescription model, final Iterable<? extends IDescription> experiments,
-			final ValidationContext status) {
+	public void validationEnded(final IModelDescription model, final Iterable<? extends IDescription> experiments,
+			final IValidationContext status) {
 		updateExperiments(experiments, status.hasErrors());
 		toRefresh = true;
 	}
@@ -380,7 +381,7 @@ public class GamaDiagramEditor extends DiagramEditor implements IGamlBuilderList
 			diagram = getDiagram();
 			final String xp = ((Button) evt.getSource()).getText();
 			if (diagram != null && !diagram.getChildren().isEmpty()) {
-				final IModel model =
+				final IModelSpecies model =
 						ModelGenerator.modelGeneration(getDiagramTypeProvider().getFeatureProvider(), diagram);
 				if (model != null) { GAMA.runGuiExperiment(xp, model); }
 			}
@@ -473,7 +474,7 @@ public class GamaDiagramEditor extends DiagramEditor implements IGamlBuilderList
 		this.errors = errors;
 
 		for (final GamlCompilationError error : errors) {
-			final EObject toto = error.getStatement();
+			final EObject toto = error.source();
 			// System.out.println("syntaxErrorsLoc : " + syntaxErrorsLoc);*/
 			final List<String> ids = new ArrayList<>();
 			final String fist_obj = buildLocation(toto, ids);
@@ -488,8 +489,8 @@ public class GamaDiagramEditor extends DiagramEditor implements IGamlBuilderList
 
 			if (locs == null) { locs = GamaMapFactory.create(); }
 			// System.out.println("error.getCode() : " + error.getCode());
-			final String key = "gaml.duplicate.definition.issue".equals(error.getCode())
-					|| "gaml.duplicate.name.issue".equals(error.getCode()) ? "name" : fist_obj;
+			final String key = "gaml.duplicate.definition.issue".equals(error.code())
+					|| "gaml.duplicate.name.issue".equals(error.code()) ? "name" : fist_obj;
 			locs.put(key, (locs.containsKey(key) ? locs.get(key) : "") + "\n" + error.toString());
 			if ("Syntax errors detected ".equals(error.toString())) {
 				if (syntaxErrorsLoc.isEmpty()) { syntaxErrorsLoc.put(ids, locs); }
@@ -535,7 +536,7 @@ public class GamaDiagramEditor extends DiagramEditor implements IGamlBuilderList
 			} else if (toto instanceof final S_ActionImpl vv) {
 				ids.add(0, vv.getName());
 				if (fist_obj == null) { fist_obj = vv.getName(); }
-			} else if (toto instanceof final speciesOrGridDisplayStatementImpl vv) {
+			} else if (toto instanceof final StatementImpl vv) {
 				ids.add(0, vv.getKey());
 				// System.out.println("vv:"+ vv.getKey());
 
